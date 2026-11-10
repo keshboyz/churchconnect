@@ -1,0 +1,318 @@
+
+/* =========================================
+   CHURCHCONNECT VIDEOS PAGE
+========================================= */
+
+.public-videos-page {
+  min-height: 100vh;
+  padding-bottom: 80px;
+  background: #f5f8fc;
+  color: #173454;
+}
+
+/* HERO SECTION */
+
+.videos-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  padding: 65px max(7%, calc((100% - 1200px) / 2));
+  border-radius: 0 0 28px 28px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(9, 30, 60, 0.92) 0%,
+      rgba(15, 55, 100, 0.78) 55%,
+      rgba(30, 91, 145, 0.62) 100%
+    ),
+    url("https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=2000&q=85")
+    center / cover no-repeat;
+}
+
+.videos-hero-content {
+  max-width: 680px;
+}
+
+.videos-eyebrow {
+  color: #b9dcff;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  margin-bottom: 18px;
+}
+
+.videos-hero h1 {
+  color: #ffffff;
+  font-size: clamp(2.7rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin: 0 0 20px;
+}
+
+.videos-hero-content > p:last-child {
+  color: #e0edfc;
+  font-size: 1.08rem;
+  line-height: 1.8;
+  max-width: 600px;
+}
+
+/* CONTENT SECTION */
+
+.videos-content {
+  max-width: 1200px;
+  width: 90%;
+  margin: 65px auto 0;
+}
+
+/* HEADING AND SEARCH */
+
+.videos-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 25px;
+  margin-bottom: 35px;
+}
+
+.videos-section-label {
+  color: #4384bd;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  margin: 0 0 10px;
+}
+
+.videos-heading-row h2 {
+  color: #173f8a;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: -1px;
+  margin: 0 0 9px;
+}
+
+.videos-count {
+  color: #718096;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.videos-search {
+  width: 300px;
+  max-width: 100%;
+  padding: 15px 19px;
+  border: 1px solid #dce6f1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #173454;
+  font-size: 0.95rem;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.videos-search:focus {
+  border-color: #3984d6;
+  box-shadow: 0 0 0 4px rgba(57, 132, 214, 0.12);
+}
+
+.videos-search::placeholder {
+  color: #9aa9ba;
+}
+
+/* VIDEO GRID */
+
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+/* VIDEO CARD */
+
+.public-video-card {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e8eef5;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(23, 52, 84, 0.045);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.public-video-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(23, 52, 84, 0.10);
+}
+
+/* VIDEO PLAYER */
+
+.public-video-player-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #102b4b;
+}
+
+.public-video-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #102b4b;
+}
+
+/* VIDEO DETAILS */
+
+.public-video-card-body {
+  padding: 24px;
+}
+
+.public-video-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 11px;
+  margin-bottom: 13px;
+  border-radius: 30px;
+  background: #e9f3ff;
+  color: #2874bd;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.public-video-card-body h3 {
+  color: #173f8a;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+
+.public-video-description {
+  color: #718096;
+  font-size: 0.93rem;
+  line-height: 1.75;
+  margin: 0 0 20px;
+}
+
+/* CARD FOOTER */
+
+.public-video-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 17px;
+  border-top: 1px solid #edf1f6;
+  color: #8998a9;
+  font-size: 0.82rem;
+}
+
+.public-video-watch-label {
+  color: #2874bd;
+  font-weight: 700;
+}
+
+/* EMPTY AND LOADING STATES */
+
+.videos-message,
+.videos-empty {
+  background: #ffffff;
+  border: 1px solid #e8eef5;
+  border-radius: 20px;
+  padding: 65px 25px;
+  text-align: center;
+  color: #718096;
+}
+
+.videos-empty-icon {
+  width: 65px;
+  height: 65px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 20px;
+  border-radius: 18px;
+  background: #e9f3ff;
+  color: #2874bd;
+  font-size: 1.8rem;
+}
+
+.videos-empty h3 {
+  color: #173f8a;
+  font-size: 1.35rem;
+  margin: 0 0 10px;
+}
+
+.videos-empty p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* BOTTOM NOTE */
+
+.videos-bottom-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 55px;
+}
+
+.videos-bottom-note span {
+  width: 45px;
+  height: 1px;
+  background: #cbd9e8;
+}
+
+.videos-bottom-note p {
+  color: #8293a7;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+  .videos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .videos-hero {
+    min-height: 300px;
+    padding: 55px 7%;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .videos-hero h1 {
+    letter-spacing: -1px;
+  }
+
+  .videos-content {
+    width: 90%;
+    margin-top: 45px;
+  }
+
+  .videos-heading-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .videos-search {
+    width: 100%;
+  }
+
+  .public-video-card-body {
+    padding: 19px;
+  }
+
+  .public-video-footer {
+    flex-wrap: wrap;
+  }
+}
