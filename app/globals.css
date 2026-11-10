@@ -4892,5 +4892,54 @@ body {
   color: #1677e8 !important;
 }
 
+/* CHURCHCONNECT MOBILE NAVIGATION FIX */
+
+@media (max-width: 900px) {
+  .navbar-inner {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    min-height: 70px;
+    align-items: center;
+  }
+
+  .mobile-menu-button {
+    display: block !important;
+    margin-left: auto;
+  }
+
+  .navbar-content {
+    display: none !important;
+    width: 100%;
+    flex: 0 0 100% !important;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 15px 0 20px;
+  }
+
+  .navbar-content.show-menu {
+    display: flex !important;
+  }
+
+  .navbar-links {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .navbar-links a {
+    display: block;
+    width: 100%;
+    padding: 13px 5px;
+  }
+
+  .navbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid #edf1f6;
+  }
+}
+
 
 
