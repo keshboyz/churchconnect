@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ChangeEvent, FormEvent, CSSProperties } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { createClient } from "../../lib/supabase/client";
 
 export default function Profile() {
@@ -10,15 +11,13 @@ export default function Profile() {
   const [ministry, setMinistry] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-
   const [memberStatus, setMemberStatus] = useState("pending");
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error" | "">(
-    "",
-  );
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
   useEffect(() => {
     async function loadProfile() {
@@ -36,9 +35,7 @@ export default function Profile() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select(
-          "full_name, phone, ministry, bio, avatar_url, member_status",
-        )
+        .select("full_name, phone, ministry, bio, avatar_url, member_status")
         .eq("id", user.id)
         .single();
 
@@ -65,27 +62,31 @@ export default function Profile() {
     loadProfile();
   }, []);
 
-  async function handleAvatarUpload(
-    e: ChangeEvent<HTMLInputElement>,
-  ) {
+  async function handleAvatarUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     setMessage("");
     setMessageType("");
 
-    if (!file.type.startsWith("image/")) {
-      setMessage("Please select a valid image file.");
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setMessage("Please select a JPG, PNG, or WebP image.");
       setMessageType("error");
+      e.target.value = "";
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
       setMessage("Please select an image smaller than 2 MB.");
       setMessageType("error");
+      e.target.value = "";
       return;
     }
 
@@ -110,9 +111,7 @@ export default function Profile() {
         return;
       }
 
-      const fileExtension =
-        file.name.split(".").pop()?.toLowerCase() || "jpg";
-
+      const fileExtension = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const filePath = `${user.id}/avatar-${Date.now()}.${fileExtension}`;
 
       const { error: uploadError } = await supabase.storage
@@ -168,6 +167,7 @@ export default function Profile() {
       setMessageType("error");
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   }
 
@@ -230,13 +230,35 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <main style={styles.page}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Loading your profile...</p>
+      <main className="profile-page">
+        <div className="loading-container">
+          <div className="spinner" />
+          <p>Loading your profile...</p>
         </div>
 
         <style jsx>{`
+          .profile-page {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: #f5f9ff;
+            color: #6c879d;
+          }
+
+          .loading-container {
+            text-align: center;
+          }
+
+          .spinner {
+            width: 42px;
+            height: 42px;
+            margin: 0 auto 15px;
+            border: 4px solid #dceeff;
+            border-top-color: #3182ce;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+
           @keyframes spin {
             to {
               transform: rotate(360deg);
@@ -249,81 +271,161 @@ export default function Profile() {
 
   if (memberStatus !== "approved") {
     return (
-      <main style={styles.page}>
-        <div style={styles.restrictedContainer}>
-          <div style={styles.restrictedIcon}>🔒</div>
+      <main className="profile-page">
+        <div className="restricted-container">
+          <div className="restricted-icon">🔒</div>
 
-          <p style={styles.eyebrow}>MY PROFILE</p>
+          <p className="eyebrow">MY PROFILE</p>
 
-          <h1 style={styles.pageTitle}>Profile Access Restricted</h1>
+          <h1>Profile Access Restricted</h1>
 
-          <p style={styles.pageSubtitle}>
+          <p className="subtitle">
             You can edit your profile after your church membership has been
             approved.
           </p>
 
-          <div style={styles.restrictedCard}>
-            <div style={styles.restrictedStatusRow}>
-              <span style={styles.restrictedLabel}>
-                Current membership status
-              </span>
-
-              <span
-                style={{
-                  ...styles.statusBadge,
-                  ...(memberStatus === "rejected"
-                    ? styles.rejectedBadge
-                    : memberStatus === "suspended"
-                      ? styles.suspendedBadge
-                      : styles.pendingBadge),
-                }}
-              >
+          <div className="restricted-card">
+            <div className="status-row">
+              <span>Current membership status</span>
+              <span className={`status-badge ${memberStatus}`}>
                 {memberStatus.toUpperCase()}
               </span>
             </div>
 
-            <p style={styles.restrictedDescription}>
+            <p>
               Please contact the church administration if you believe your
               membership status needs to be reviewed.
             </p>
           </div>
 
-          <a href="/dashboard" style={styles.backButton}>
+          <a href="/dashboard" className="back-button">
             ← Back to Dashboard
           </a>
         </div>
+
+        <style jsx>{`
+          .profile-page {
+            min-height: 100vh;
+            padding: 50px 20px;
+            background: #f5f9ff;
+            color: #17324d;
+          }
+
+          .restricted-container {
+            width: 100%;
+            max-width: 650px;
+            margin: 30px auto;
+            text-align: center;
+          }
+
+          .restricted-icon {
+            width: 75px;
+            height: 75px;
+            margin: 0 auto 22px;
+            display: grid;
+            place-items: center;
+            border-radius: 24px;
+            background: #eaf5ff;
+            font-size: 32px;
+          }
+
+          .eyebrow {
+            color: #5b8bb1;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+          }
+
+          h1 {
+            color: #1f4f91;
+            font-size: clamp(28px, 5vw, 42px);
+          }
+
+          .subtitle {
+            color: #66829b;
+            line-height: 1.6;
+          }
+
+          .restricted-card {
+            margin: 30px 0 24px;
+            padding: 25px;
+            border: 1px solid #dcebf6;
+            border-radius: 20px;
+            background: white;
+            text-align: left;
+          }
+
+          .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+          }
+
+          .status-badge {
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+          }
+
+          .pending {
+            background: #fef3c7;
+            color: #92400e;
+          }
+
+          .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+
+          .suspended {
+            background: #e5e7eb;
+            color: #374151;
+          }
+
+          .restricted-card p {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid #e8f1f7;
+            color: #7890a2;
+            line-height: 1.6;
+          }
+
+          .back-button {
+            color: #2d75b8;
+            font-weight: 700;
+            text-decoration: none;
+          }
+        `}</style>
       </main>
     );
   }
 
   return (
-    <main style={styles.page}>
-      <div style={styles.container}>
-        {/* PAGE HEADER */}
-        <section style={styles.pageHeader}>
-          <p style={styles.eyebrow}>ACCOUNT SETTINGS</p>
-
-          <h1 style={styles.pageTitle}>My Profile</h1>
-
-          <p style={styles.pageSubtitle}>
+    <main className="profile-page">
+      <div className="profile-container">
+        <header className="page-header">
+          <p className="eyebrow">ACCOUNT SETTINGS</p>
+          <h1>My Profile</h1>
+          <p className="subtitle">
             Keep your church community profile up to date.
           </p>
-        </section>
+        </header>
 
-        {/* MAIN PROFILE LAYOUT */}
-        <div style={styles.profileLayout}>
-          {/* PROFILE PHOTO CARD */}
-          <section style={styles.photoCard}>
-            <div style={styles.cardTopLine}></div>
+        <div className="profile-layout">
+          <section className="photo-card">
+            <div className="card-top-line" />
 
-            <p style={styles.cardEyebrow}>PROFILE PHOTO</p>
+            <p className="card-eyebrow">PROFILE PHOTO</p>
 
-            <div style={styles.photoWrapper}>
+            <div className="photo-wrapper">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt="Your profile"
-                  style={styles.profilePhoto}
+                  className="profile-photo"
                   onError={() => {
                     setMessage(
                       "The image could not be loaded. Please check your Supabase Storage settings.",
@@ -332,22 +434,19 @@ export default function Profile() {
                   }}
                 />
               ) : (
-                <div style={styles.photoPlaceholder}>{initial}</div>
+                <div className="photo-placeholder">{initial}</div>
               )}
             </div>
 
-            <h2 style={styles.photoName}>{displayName}</h2>
+            <h2 className="photo-name">{displayName}</h2>
 
-            <p style={styles.photoRole}>
+            <p className="photo-role">
               {ministry || "Church Community Member"}
             </p>
 
             <label
               htmlFor="avatar"
-              style={{
-                ...styles.uploadButton,
-                ...(uploading ? styles.disabledButton : {}),
-              }}
+              className={`upload-button ${uploading ? "disabled" : ""}`}
             >
               {uploading ? "Uploading..." : "Choose Profile Photo"}
             </label>
@@ -355,44 +454,39 @@ export default function Profile() {
             <input
               id="avatar"
               type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp"
+              accept="image/png,image/jpeg,image/webp"
               onChange={handleAvatarUpload}
               disabled={uploading}
-              style={styles.hiddenFileInput}
+              className="hidden-file-input"
             />
 
-            <p style={styles.uploadHelp}>
+            <p className="upload-help">
               JPG, JPEG, PNG, or WebP
               <br />
               Maximum size: 2 MB
             </p>
 
-            <div style={styles.photoTip}>
+            <div className="photo-tip">
               <span>💡</span>
               <p>Use a clear photo so other members can recognize you.</p>
             </div>
           </section>
 
-          {/* PROFILE FORM CARD */}
-          <section style={styles.formCard}>
-            <div style={styles.formHeader}>
+          <section className="form-card">
+            <div className="form-header">
               <div>
-                <p style={styles.cardEyebrow}>PERSONAL INFORMATION</p>
-                <h2 style={styles.formTitle}>Update your details</h2>
+                <p className="card-eyebrow">PERSONAL INFORMATION</p>
+                <h2>Update your details</h2>
               </div>
 
-              <div style={styles.approvedBadge}>✓ APPROVED MEMBER</div>
+              <div className="approved-badge">✓ APPROVED MEMBER</div>
             </div>
 
-            <div style={styles.formDivider}></div>
+            <div className="form-divider" />
 
             <form onSubmit={handleSave}>
-              {/* FULL NAME */}
-              <div style={styles.fieldGroup}>
-                <label htmlFor="name" style={styles.label}>
-                  Full Name
-                </label>
-
+              <div className="field-group">
+                <label htmlFor="name">Full Name</label>
                 <input
                   type="text"
                   id="name"
@@ -400,98 +494,62 @@ export default function Profile() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your full name"
                   required
-                  style={styles.input}
                 />
               </div>
 
-              {/* PHONE */}
-              <div style={styles.fieldGroup}>
-                <label htmlFor="phone" style={styles.label}>
-                  Phone Number
-                </label>
-
+              <div className="field-group">
+                <label htmlFor="phone">Phone Number</label>
                 <input
                   type="tel"
                   id="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Enter your phone number"
-                  style={styles.input}
                 />
               </div>
 
-              {/* MINISTRY */}
-              <div style={styles.fieldGroup}>
-                <label htmlFor="ministry" style={styles.label}>
-                  Ministry
-                </label>
-
+              <div className="field-group">
+                <label htmlFor="ministry">Ministry</label>
                 <input
                   type="text"
                   id="ministry"
                   value={ministry}
                   onChange={(e) => setMinistry(e.target.value)}
                   placeholder="e.g. Youth, Worship, Media, Ushering"
-                  style={styles.input}
                 />
-
-                <p style={styles.fieldHint}>
+                <p className="field-hint">
                   Enter the ministry or church department you serve in.
                 </p>
               </div>
 
-              {/* BIO */}
-              <div style={styles.fieldGroup}>
-                <label htmlFor="bio" style={styles.label}>
-                  About Me
-                </label>
-
+              <div className="field-group">
+                <label htmlFor="bio">About Me</label>
                 <textarea
                   id="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Tell the church community a little about yourself"
                   rows={6}
-                  style={styles.textarea}
                 />
-
-                <p style={styles.fieldHint}>
+                <p className="field-hint">
                   Share a short introduction that other approved members can
                   see.
                 </p>
               </div>
 
-              {/* MESSAGE */}
               {message && (
-                <div
-                  style={{
-                    ...styles.messageBox,
-                    ...(messageType === "error"
-                      ? styles.errorMessage
-                      : styles.successMessage),
-                  }}
-                >
-                  <span>
-                    {messageType === "error" ? "⚠️" : "✓"}
-                  </span>
+                <div className={`message-box ${messageType}`}>
+                  <span>{messageType === "error" ? "⚠️" : "✓"}</span>
                   <p>{message}</p>
                 </div>
               )}
 
-              {/* ACTIONS */}
-              <div style={styles.formActions}>
-                <a href="/dashboard" style={styles.cancelButton}>
+              <div className="form-actions">
+                <a href="/dashboard" className="cancel-button">
                   Cancel
                 </a>
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  style={{
-                    ...styles.saveButton,
-                    ...(saving ? styles.disabledButton : {}),
-                  }}
-                >
+                <button type="submit" disabled={saving}>
                   {saving ? "Saving Changes..." : "Save Profile"}
                 </button>
               </div>
@@ -499,13 +557,11 @@ export default function Profile() {
           </section>
         </div>
 
-        {/* PRIVACY NOTE */}
-        <section style={styles.privacyCard}>
-          <div style={styles.privacyIcon}>🛡️</div>
-
+        <section className="privacy-card">
+          <div className="privacy-icon">🛡️</div>
           <div>
-            <h2 style={styles.privacyTitle}>Your information is protected</h2>
-            <p style={styles.privacyText}>
+            <h2>Your information is protected</h2>
+            <p>
               Your profile information is intended for the ChurchConnect
               community and is managed according to the church&apos;s privacy
               guidelines.
@@ -515,495 +571,451 @@ export default function Profile() {
       </div>
 
       <style jsx>{`
-        input:focus,
-        textarea:focus {
+        .profile-page {
+          min-height: 100vh;
+          padding: 50px 20px 80px;
+          background: #f5f9ff;
+          color: #17324d;
+          overflow-x: hidden;
+        }
+
+        .profile-container {
+          width: 100%;
+          max-width: 1120px;
+          margin: 0 auto;
+        }
+
+        .page-header {
+          margin-bottom: 38px;
+          text-align: center;
+        }
+
+        .eyebrow {
+          margin: 0 0 10px;
+          color: #5b8bb1;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 1.8px;
+        }
+
+        .page-header h1 {
+          margin: 0;
+          color: #1f4f91;
+          font-size: clamp(32px, 5vw, 48px);
+          line-height: 1.15;
+        }
+
+        .subtitle {
+          margin: 14px 0 0;
+          color: #66829b;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+
+        .profile-layout {
+          display: grid;
+          grid-template-columns: 330px minmax(0, 1fr);
+          align-items: start;
+          gap: 24px;
+        }
+
+        .photo-card,
+        .form-card {
+          min-width: 0;
+          box-sizing: border-box;
+          border: 1px solid #dcebf6;
+          border-radius: 24px;
+          background: white;
+          box-shadow: 0 12px 35px rgba(42, 108, 157, 0.07);
+        }
+
+        .photo-card {
+          position: relative;
+          overflow: hidden;
+          padding: 30px 25px;
+          text-align: center;
+        }
+
+        .card-top-line {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 5px;
+          background: linear-gradient(90deg, #3182ce, #72c7f5);
+        }
+
+        .card-eyebrow {
+          margin: 0;
+          color: #7194ae;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 1.4px;
+        }
+
+        .photo-wrapper {
+          display: flex;
+          justify-content: center;
+          margin: 25px 0 18px;
+        }
+
+        .profile-photo,
+        .photo-placeholder {
+          width: 160px;
+          height: 160px;
+          box-sizing: border-box;
+          border: 6px solid #edf7ff;
+          border-radius: 50%;
+          box-shadow: 0 8px 25px rgba(33, 91, 132, 0.15);
+        }
+
+        .profile-photo {
+          object-fit: cover;
+        }
+
+        .photo-placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #3182ce, #76c8f2);
+          color: white;
+          font-size: 58px;
+          font-weight: 700;
+        }
+
+        .photo-name {
+          margin: 0 0 7px;
+          color: #214b6c;
+          font-size: 22px;
+          font-weight: 700;
+          overflow-wrap: anywhere;
+        }
+
+        .photo-role {
+          margin: 0 0 24px;
+          color: #7791a5;
+          font-size: 14px;
+          overflow-wrap: anywhere;
+        }
+
+        .upload-button {
+          display: inline-block;
+          max-width: 100%;
+          box-sizing: border-box;
+          padding: 12px 18px;
+          border: 1px solid #cce7fa;
+          border-radius: 12px;
+          background: #e8f4ff;
+          color: #2166a3;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: 0.2s ease;
+        }
+
+        .upload-button:hover {
+          background: #d8edff;
+          transform: translateY(-1px);
+        }
+
+        .upload-button.disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .hidden-file-input {
+          display: none;
+        }
+
+        .upload-help {
+          margin: 13px 0 0;
+          color: #8aa0b2;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .photo-tip {
+          display: flex;
+          align-items: flex-start;
+          gap: 9px;
+          margin-top: 24px;
+          padding: 13px;
+          border: 1px solid #e0f0fa;
+          border-radius: 12px;
+          background: #f4faff;
+          text-align: left;
+        }
+
+        .photo-tip p {
+          margin: 0;
+          color: #66829b;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .form-card {
+          padding: 32px;
+        }
+
+        .form-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 20px;
+        }
+
+        .form-header h2 {
+          margin: 8px 0 0;
+          color: #214b6c;
+          font-size: 25px;
+          font-weight: 700;
+        }
+
+        .approved-badge {
+          padding: 9px 13px;
+          border-radius: 999px;
+          background: #dcfce7;
+          color: #16733a;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          white-space: nowrap;
+        }
+
+        .form-divider {
+          height: 1px;
+          margin: 25px 0;
+          background: #e8f1f7;
+        }
+
+        .field-group {
+          margin-bottom: 23px;
+        }
+
+        .field-group label {
+          display: block;
+          margin-bottom: 9px;
+          color: #315672;
+          font-size: 14px;
+          font-weight: 700;
+        }
+
+        .field-group input,
+        .field-group textarea {
+          display: block;
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
+          padding: 12px 14px;
+          border: 1px solid #d6e5ef;
+          border-radius: 12px;
+          background: #fbfdff;
+          color: #244962;
+          font-family: inherit;
+          font-size: 14px;
+        }
+
+        .field-group input {
+          min-height: 48px;
+        }
+
+        .field-group textarea {
+          min-height: 140px;
+          resize: vertical;
+          line-height: 1.6;
+        }
+
+        .field-group input:focus,
+        .field-group textarea:focus {
           outline: none;
           border-color: #3182ce;
           box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.1);
         }
 
-        button,
-        label,
-        a {
-          transition:
-            background 0.2s ease,
-            color 0.2s ease,
-            border-color 0.2s ease,
-            box-shadow 0.2s ease,
-            transform 0.2s ease;
+        .field-hint {
+          margin: 8px 0 0;
+          color: #8aa0b2;
+          font-size: 12px;
+          line-height: 1.5;
         }
 
-        button:hover:not(:disabled),
-        label:hover:not(:has(+ input:disabled)) {
+        .message-box {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          margin-bottom: 22px;
+          padding: 13px 15px;
+          border-radius: 12px;
+        }
+
+        .message-box p {
+          margin: 0;
+          overflow-wrap: anywhere;
+        }
+
+        .message-box.success {
+          border: 1px solid #bbf7d0;
+          background: #ecfdf3;
+          color: #166534;
+        }
+
+        .message-box.error {
+          border: 1px solid #fecdd3;
+          background: #fff1f2;
+          color: #9f1239;
+        }
+
+        .form-actions {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 12px;
+          margin-top: 10px;
+        }
+
+        .cancel-button,
+        .form-actions button {
+          display: inline-block;
+          box-sizing: border-box;
+          padding: 12px 20px;
+          border-radius: 12px;
+          font-size: 14px;
+          font-weight: 700;
+          text-align: center;
+          text-decoration: none;
+          transition: 0.2s ease;
+        }
+
+        .cancel-button {
+          border: 1px solid #d8e7f1;
+          background: white;
+          color: #5e7b92;
+        }
+
+        .form-actions button {
+          border: none;
+          background: #3182ce;
+          color: white;
+          cursor: pointer;
+          box-shadow: 0 6px 15px rgba(49, 130, 206, 0.2);
+        }
+
+        .form-actions button:hover:not(:disabled) {
+          background: #256caf;
           transform: translateY(-1px);
+        }
+
+        .form-actions button:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
+
+        .privacy-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+          margin-top: 24px;
+          padding: 22px;
+          border: 1px solid #d8edf9;
+          border-radius: 18px;
+          background: #edf8ff;
+        }
+
+        .privacy-icon {
+          display: grid;
+          width: 44px;
+          height: 44px;
+          flex-shrink: 0;
+          place-items: center;
+          border-radius: 12px;
+          background: white;
+          font-size: 21px;
+        }
+
+        .privacy-card h2 {
+          margin: 0 0 6px;
+          color: #28516d;
+          font-size: 16px;
+        }
+
+        .privacy-card p {
+          margin: 0;
+          color: #6b879c;
+          font-size: 13px;
+          line-height: 1.6;
         }
 
         @media (max-width: 850px) {
           .profile-layout {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 20px;
+          }
+
+          .photo-card,
+          .form-card {
+            width: 100%;
+          }
+
+          .photo-card {
+            padding: 28px 22px;
           }
         }
 
         @media (max-width: 550px) {
+          .profile-page {
+            padding: 30px 14px 50px;
+          }
+
           .page-header {
-            text-align: left;
+            margin-bottom: 25px;
+            text-align: center;
+          }
+
+          .page-header h1 {
+            font-size: 34px;
+          }
+
+          .subtitle {
+            font-size: 14px;
+          }
+
+          .photo-card,
+          .form-card {
+            border-radius: 18px;
+          }
+
+          .form-card {
+            padding: 22px 17px;
+          }
+
+          .form-header {
+            flex-direction: column;
+            gap: 13px;
+          }
+
+          .form-header h2 {
+            font-size: 21px;
+          }
+
+          .approved-badge {
+            white-space: normal;
           }
 
           .form-actions {
-            flex-direction: column-reverse !important;
+            flex-direction: column-reverse;
+            align-items: stretch;
           }
 
           .form-actions a,
           .form-actions button {
-            width: 100% !important;
-            text-align: center;
+            width: 100%;
+          }
+
+          .privacy-card {
+            padding: 17px;
           }
         }
       `}</style>
     </main>
   );
 }
-
-const styles: Record<string, CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    background: "#f5f9ff",
-    padding: "50px 20px 80px",
-    color: "#17324d",
-  },
-
-  container: {
-    width: "100%",
-    maxWidth: "1120px",
-    margin: "0 auto",
-  },
-
-  pageHeader: {
-    textAlign: "center",
-    marginBottom: "38px",
-  },
-
-  eyebrow: {
-    margin: "0 0 10px",
-    color: "#5b8bb1",
-    fontSize: "12px",
-    fontWeight: 800,
-    letterSpacing: "1.8px",
-  },
-
-  pageTitle: {
-    margin: 0,
-    color: "#1f4f91",
-    fontSize: "clamp(32px, 5vw, 48px)",
-    fontWeight: 700,
-    lineHeight: 1.15,
-  },
-
-  pageSubtitle: {
-    margin: "14px 0 0",
-    color: "#66829b",
-    fontSize: "16px",
-    lineHeight: 1.6,
-  },
-
-  profileLayout: {
-    display: "grid",
-    gridTemplateColumns: "330px minmax(0, 1fr)",
-    alignItems: "start",
-    gap: "24px",
-  },
-
-  photoCard: {
-    position: "relative",
-    background: "white",
-    border: "1px solid #dcebf6",
-    borderRadius: "24px",
-    padding: "30px 25px",
-    textAlign: "center",
-    boxShadow: "0 12px 35px rgba(42, 108, 157, 0.07)",
-    overflow: "hidden",
-  },
-
-  cardTopLine: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: "5px",
-    background: "linear-gradient(90deg, #3182ce, #72c7f5)",
-  },
-
-  cardEyebrow: {
-    margin: 0,
-    color: "#7194ae",
-    fontSize: "11px",
-    fontWeight: 800,
-    letterSpacing: "1.4px",
-  },
-
-  photoWrapper: {
-    display: "flex",
-    justifyContent: "center",
-    margin: "25px 0 18px",
-  },
-
-  profilePhoto: {
-    width: "160px",
-    height: "160px",
-    borderRadius: "50%",
-    objectFit: "cover",
-    border: "6px solid #edf7ff",
-    boxShadow: "0 8px 25px rgba(33, 91, 132, 0.15)",
-  },
-
-  photoPlaceholder: {
-    width: "160px",
-    height: "160px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, #3182ce, #76c8f2)",
-    color: "white",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "58px",
-    fontWeight: 700,
-    border: "6px solid #edf7ff",
-    boxShadow: "0 8px 25px rgba(33, 91, 132, 0.15)",
-  },
-
-  photoName: {
-    margin: "0 0 7px",
-    color: "#214b6c",
-    fontSize: "22px",
-    fontWeight: 700,
-    wordBreak: "break-word",
-  },
-
-  photoRole: {
-    margin: "0 0 24px",
-    color: "#7791a5",
-    fontSize: "14px",
-  },
-
-  uploadButton: {
-    display: "inline-block",
-    padding: "12px 18px",
-    background: "#e8f4ff",
-    color: "#2166a3",
-    border: "1px solid #cce7fa",
-    borderRadius: "12px",
-    fontSize: "13px",
-    fontWeight: 700,
-    cursor: "pointer",
-  },
-
-  hiddenFileInput: {
-    display: "none",
-  },
-
-  uploadHelp: {
-    margin: "13px 0 0",
-    color: "#8aa0b2",
-    fontSize: "12px",
-    lineHeight: 1.6,
-  },
-
-  photoTip: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "9px",
-    textAlign: "left",
-    background: "#f4faff",
-    border: "1px solid #e0f0fa",
-    borderRadius: "12px",
-    padding: "13px",
-    marginTop: "24px",
-  },
-
-  formCard: {
-    background: "white",
-    border: "1px solid #dcebf6",
-    borderRadius: "24px",
-    padding: "32px",
-    boxShadow: "0 12px 35px rgba(42, 108, 157, 0.07)",
-  },
-
-  formHeader: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: "20px",
-  },
-
-  formTitle: {
-    margin: "8px 0 0",
-    color: "#214b6c",
-    fontSize: "25px",
-    fontWeight: 700,
-  },
-
-  approvedBadge: {
-    background: "#dcfce7",
-    color: "#16733a",
-    borderRadius: "999px",
-    padding: "9px 13px",
-    fontSize: "10px",
-    fontWeight: 800,
-    letterSpacing: "0.6px",
-    whiteSpace: "nowrap",
-  },
-
-  formDivider: {
-    height: "1px",
-    background: "#e8f1f7",
-    margin: "25px 0",
-  },
-
-  fieldGroup: {
-    marginBottom: "23px",
-  },
-
-  label: {
-    display: "block",
-    color: "#315672",
-    fontSize: "14px",
-    fontWeight: 700,
-    marginBottom: "9px",
-  },
-
-  input: {
-    width: "100%",
-    minHeight: "48px",
-    padding: "12px 14px",
-    border: "1px solid #d6e5ef",
-    borderRadius: "12px",
-    background: "#fbfdff",
-    color: "#244962",
-    fontSize: "14px",
-    boxSizing: "border-box",
-  },
-
-  textarea: {
-    width: "100%",
-    minHeight: "140px",
-    padding: "13px 14px",
-    border: "1px solid #d6e5ef",
-    borderRadius: "12px",
-    background: "#fbfdff",
-    color: "#244962",
-    fontSize: "14px",
-    lineHeight: 1.6,
-    resize: "vertical",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
-  },
-
-  fieldHint: {
-    margin: "8px 0 0",
-    color: "#8aa0b2",
-    fontSize: "12px",
-    lineHeight: 1.5,
-  },
-
-  messageBox: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "10px",
-    padding: "13px 15px",
-    borderRadius: "12px",
-    marginBottom: "22px",
-  },
-
-  messageBoxText: {
-    margin: 0,
-  },
-
-  successMessage: {
-    background: "#ecfdf3",
-    border: "1px solid #bbf7d0",
-    color: "#166534",
-  },
-
-  errorMessage: {
-    background: "#fff1f2",
-    border: "1px solid #fecdd3",
-    color: "#9f1239",
-  },
-
-  formActions: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: "12px",
-    marginTop: "10px",
-  },
-
-  cancelButton: {
-    display: "inline-block",
-    padding: "12px 20px",
-    borderRadius: "12px",
-    border: "1px solid #d8e7f1",
-    background: "white",
-    color: "#5e7b92",
-    fontSize: "14px",
-    fontWeight: 700,
-  },
-
-  saveButton: {
-    border: "none",
-    padding: "13px 23px",
-    borderRadius: "12px",
-    background: "#3182ce",
-    color: "white",
-    fontSize: "14px",
-    fontWeight: 700,
-    cursor: "pointer",
-    boxShadow: "0 6px 15px rgba(49, 130, 206, 0.2)",
-  },
-
-  disabledButton: {
-    opacity: 0.65,
-    cursor: "not-allowed",
-  },
-
-  privacyCard: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "15px",
-    background: "#edf8ff",
-    border: "1px solid #d8edf9",
-    borderRadius: "18px",
-    padding: "22px",
-    marginTop: "24px",
-  },
-
-  privacyIcon: {
-    width: "44px",
-    height: "44px",
-    borderRadius: "12px",
-    background: "white",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "21px",
-    flexShrink: 0,
-  },
-
-  privacyTitle: {
-    margin: "0 0 6px",
-    color: "#28516d",
-    fontSize: "16px",
-  },
-
-  privacyText: {
-    margin: 0,
-    color: "#6b879c",
-    fontSize: "13px",
-    lineHeight: 1.6,
-  },
-
-  loadingContainer: {
-    minHeight: "70vh",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "15px",
-  },
-
-  spinner: {
-    width: "42px",
-    height: "42px",
-    border: "4px solid #dceeff",
-    borderTop: "4px solid #3182ce",
-    borderRadius: "50%",
-    animation: "spin 0.8s linear infinite",
-  },
-
-  loadingText: {
-    color: "#6c879d",
-    fontSize: "15px",
-  },
-
-  restrictedContainer: {
-    width: "100%",
-    maxWidth: "650px",
-    margin: "60px auto",
-    textAlign: "center",
-  },
-
-  restrictedIcon: {
-    width: "75px",
-    height: "75px",
-    margin: "0 auto 22px",
-    borderRadius: "24px",
-    background: "#eaf5ff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "32px",
-  },
-
-  restrictedCard: {
-    background: "white",
-    border: "1px solid #dcebf6",
-    borderRadius: "20px",
-    padding: "25px",
-    margin: "30px 0 24px",
-    textAlign: "left",
-    boxShadow: "0 10px 30px rgba(42, 108, 157, 0.06)",
-  },
-
-  restrictedStatusRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "15px",
-  },
-
-  restrictedLabel: {
-    color: "#55758e",
-    fontSize: "14px",
-    fontWeight: 700,
-  },
-
-  restrictedDescription: {
-    margin: "20px 0 0",
-    paddingTop: "18px",
-    borderTop: "1px solid #e8f1f7",
-    color: "#7890a2",
-    fontSize: "14px",
-    lineHeight: 1.6,
-  },
-
-  statusBadge: {
-    display: "inline-block",
-    padding: "8px 12px",
-    borderRadius: "999px",
-    fontSize: "10px",
-    fontWeight: 800,
-    letterSpacing: "0.7px",
-  },
-
-  pendingBadge: {
-    background: "#fef3c7",
-    color: "#92400e",
-  },
-
-  rejectedBadge: {
-    background: "#fee2e2",
-    color: "#991b1b",
-  },
-
-  suspendedBadge: {
-    background: "#e5e7eb",
-    color: "#374151",
-  },
-
-  backButton: {
-    display: "inline-block",
-    color: "#2d75b8",
-    fontSize: "14px",
-    fontWeight: 700,
-  },
-};
